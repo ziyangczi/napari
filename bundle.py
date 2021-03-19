@@ -103,8 +103,6 @@ def patched_toml():
 
 
 def patch_dmgbuild():
-    if not MACOS:
-        return
     from dmgbuild import core
 
     # will not be required after dmgbuild > v1.3.3
@@ -118,8 +116,7 @@ def patch_dmgbuild():
                 "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)"
                 ";time.sleep(30)",
             ).replace(
-                "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0]"
-                ".split('.'))",
+                "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.'))",
                 "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0]"
                 ".split('.')) if platform.mac_ver()[0] else (0, 0)",
             )
@@ -201,8 +198,7 @@ def clean():
 def bundle():
     clean()
 
-    if MACOS:
-        patch_dmgbuild()
+    patch_dmgbuild()
 
     # smoke test, and build resources
     subprocess.check_call([sys.executable, '-m', APP, '--info'])
