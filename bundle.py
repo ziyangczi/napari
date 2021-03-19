@@ -1,4 +1,5 @@
 import configparser
+import inspect
 import os
 import re
 import shutil
@@ -103,16 +104,11 @@ def patched_toml():
 
 
 def patch_dmgbuild():
-    try:
-        from dmgbuild import core
-    except ValueError:
-        print("This is expected")
+    import dmgbuild
 
-    # will not be required after dmgbuild > v1.3.3
-    # see https://github.com/al45tair/dmgbuild/pull/18
-    with open(core.__file__) as f:
+    with open(inspect.getfile(dmgbuild.core)) as f:
         src = f.read()
-    with open(core.__file__, 'w') as f:
+    with open(inspect.getfile(dmgbuild.core), 'w') as f:
         f.write(
             src.replace(
                 "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)",
