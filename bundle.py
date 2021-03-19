@@ -103,21 +103,18 @@ def patched_toml():
 
 
 def patch_dmgbuild():
-    import site
+    if not MACOS:
+        return
+    from dmgbuild import core
 
-    core_path = os.path.join(site.getsitepackages()[0], "dmgbuild", "core.py")
-    with open(core_path) as f:
+    with open(core.__file__) as f:
         src = f.read()
-    with open(core_path, 'w') as f:
+    with open(core.__file__, 'w') as f:
         f.write(
             src.replace(
                 "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)",
                 "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)"
                 ";time.sleep(30)",
-            ).replace(
-                "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.'))",
-                "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0]"
-                ".split('.')) if platform.mac_ver()[0] else (0, 0)",
             )
         )
         print("patched dmgbuild.core")
@@ -197,7 +194,8 @@ def clean():
 def bundle():
     clean()
 
-    patch_dmgbuild()
+    if MACOS:
+        patch_dmgbuild()
 
     # smoke test, and build resources
     subprocess.check_call([sys.executable, '-m', APP, '--info'])
