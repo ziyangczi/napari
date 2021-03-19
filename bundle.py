@@ -231,14 +231,10 @@ def bundle():
 
 
 if __name__ == "__main__":
-    import site
-
-    print(site.getsitepackages())
-
     if '--clean' in sys.argv:
         clean()
         sys.exit()
     if '--version' in sys.argv:
         print(VERSION)
         sys.exit()
-    # print('created', bundle())
+    print('created', bundle())
