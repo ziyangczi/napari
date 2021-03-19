@@ -35,6 +35,10 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 PYPROJECT_TOML = os.path.join(HERE, 'pyproject.toml')
 SETUP_CFG = os.path.join(HERE, 'setup.cfg')
 
+print(WINDOWS)
+print(MACOS)
+print(LINUX)
+
 if WINDOWS:
     BUILD_DIR = os.path.join(HERE, 'windows')
 elif LINUX:
@@ -100,25 +104,6 @@ def patched_toml():
     finally:
         with open(PYPROJECT_TOML, 'w') as f:
             f.write(original_toml)
-
-
-def patch_dmgbuild():
-    if not MACOS:
-        return
-    from dmgbuild import core
-
-    # will not be required after dmgbuild > v1.3.3
-    # see https://github.com/al45tair/dmgbuild/pull/18
-    with open(core.__file__) as f:
-        src = f.read()
-    with open(core.__file__, 'w') as f:
-        f.write(
-            src.replace(
-                "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)",
-                "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True);time.sleep(30)",
-            )
-        )
-        print("patched dmgbuild.core")
 
 
 def add_site_packages_to_path():
@@ -195,9 +180,6 @@ def clean():
 def bundle():
     clean()
 
-    if MACOS:
-        patch_dmgbuild()
-
     # smoke test, and build resources
     subprocess.check_call([sys.executable, '-m', APP, '--info'])
 
@@ -213,20 +195,20 @@ def bundle():
         if WINDOWS:
             patch_wxs()
 
-    # build
-    cmd = ['briefcase', 'build'] + (['--no-docker'] if LINUX else [])
-    subprocess.check_call(cmd)
+        # build
+        cmd = ['briefcase', 'build'] + (['--no-docker'] if LINUX else [])
+        subprocess.check_call(cmd)
 
-    # package
-    cmd = ['briefcase', 'package']
-    cmd += ['--no-sign'] if MACOS else (['--no-docker'] if LINUX else [])
-    subprocess.check_call(cmd)
+        # package
+        cmd = ['briefcase', 'package']
+        cmd += ['--no-sign'] if MACOS else (['--no-docker'] if LINUX else [])
+        subprocess.check_call(cmd)
 
-    # compress
-    dest = make_zip()
-    clean()
+        # compress
+        dest = make_zip()
+        clean()
 
-    return dest
+        return dest
 
 
 if __name__ == "__main__":
