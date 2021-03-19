@@ -105,7 +105,7 @@ def patched_toml():
 def patch_dmgbuild():
     import site
 
-    core_path = os.path.join(site.getsitepackages(), "dmgbuild/core.py")
+    core_path = os.path.join(site.getsitepackages()[0], "dmgbuild/core.py")
     with open(core_path) as f:
         src = f.read()
     with open(core_path, 'w') as f:
