@@ -87,9 +87,9 @@ def patched_toml():
     toml['tool']['briefcase']['app'][APP]['requires'] = requirements
     toml['tool']['briefcase']['version'] = VERSION
 
-    print("patching pyroject.toml to version: ", VERSION)
+    print("patching pyproject.toml to version: ", VERSION)
     print(
-        "patching pyroject.toml requirements to : \n",
+        "patching pyproject.toml requirements to : \n",
         "\n".join(toml['tool']['briefcase']['app'][APP]['requires']),
     )
     with open(PYPROJECT_TOML, 'w') as f:
@@ -100,6 +100,31 @@ def patched_toml():
     finally:
         with open(PYPROJECT_TOML, 'w') as f:
             f.write(original_toml)
+
+
+def patch_dmgbuild():
+    if not MACOS:
+        return
+    from dmgbuild import core
+
+    # will not be required after dmgbuild > v1.3.3
+    # see https://github.com/al45tair/dmgbuild/pull/18
+    with open(core.__file__) as f:
+        src = f.read()
+    with open(core.__file__, 'w') as f:
+        f.write(
+            src.replace(
+                "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)",
+                "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)"
+                ";time.sleep(30)",
+            ).replace(
+                "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0]"
+                ".split('.'))",
+                "MACOS_VERSION = tuple(int(v) for v in platform.mac_ver()[0]"
+                ".split('.')) if platform.mac_ver()[0] else (0, 0)",
+            )
+        )
+        print("patched dmgbuild.core")
 
 
 def add_site_packages_to_path():
@@ -175,6 +200,9 @@ def clean():
 
 def bundle():
     clean()
+
+    if MACOS:
+        patch_dmgbuild()
 
     # smoke test, and build resources
     subprocess.check_call([sys.executable, '-m', APP, '--info'])
