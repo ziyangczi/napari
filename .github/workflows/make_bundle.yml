@@ -52,7 +52,7 @@ jobs:
       - name: Install pinned version briefcase linux
         if: runner.os == 'Linux'
         run: python -m pip install briefcase==0.3.1
-      - namm: Install briefcase
+      - name: Install briefcase
         if: runner.os != 'Linux'
         run: python -m pip install briefcase
       - name: get tag
