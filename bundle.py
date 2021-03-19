@@ -1,5 +1,4 @@
 import configparser
-import inspect
 import os
 import re
 import shutil
@@ -104,11 +103,12 @@ def patched_toml():
 
 
 def patch_dmgbuild():
-    import dmgbuild
+    import site
 
-    with open(inspect.getfile(dmgbuild.core)) as f:
+    core_path = os.path.join(site.getsitepackages(), "dmgbuild/core.py")
+    with open(core_path) as f:
         src = f.read()
-    with open(inspect.getfile(dmgbuild.core), 'w') as f:
+    with open(core_path, 'w') as f:
         f.write(
             src.replace(
                 "shutil.rmtree(os.path.join(mount_point, '.Trashes'), True)",
@@ -231,10 +231,14 @@ def bundle():
 
 
 if __name__ == "__main__":
+    import site
+
+    print(site.getsitepackages())
+
     if '--clean' in sys.argv:
         clean()
         sys.exit()
     if '--version' in sys.argv:
         print(VERSION)
         sys.exit()
-    print('created', bundle())
+    # print('created', bundle())
