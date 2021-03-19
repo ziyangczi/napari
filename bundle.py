@@ -103,7 +103,10 @@ def patched_toml():
 
 
 def patch_dmgbuild():
-    from dmgbuild import core
+    try:
+        from dmgbuild import core
+    except ValueError:
+        print("This is expected")
 
     # will not be required after dmgbuild > v1.3.3
     # see https://github.com/al45tair/dmgbuild/pull/18
