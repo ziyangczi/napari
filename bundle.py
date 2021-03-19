@@ -35,10 +35,6 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 PYPROJECT_TOML = os.path.join(HERE, 'pyproject.toml')
 SETUP_CFG = os.path.join(HERE, 'setup.cfg')
 
-print(WINDOWS)
-print(MACOS)
-print(LINUX)
-
 if WINDOWS:
     BUILD_DIR = os.path.join(HERE, 'windows')
 elif LINUX:
